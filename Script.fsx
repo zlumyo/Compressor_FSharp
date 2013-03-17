@@ -8,7 +8,7 @@ let tests_for_rle_compression =
     [
         "AAAAA"; "AAAAAB"; "ABBBBB"; "AAABCCC"; "ABCDE"; "ABCDEEEE"; new String('A', 128);
         (* 60 chars + 60 chars + 9 chars*) "ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC" + 
-        "ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC" + "ABCABCABC"
+        "ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC" + "ABCABCABC"; ""
     ]
 
 let etalons_for_rle_compression = 
@@ -25,7 +25,7 @@ let etalons_for_rle_compression =
                                                 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 
                                                 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 
                                                 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 
-                                                65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 1uy; 67uy; |]
+                                                65uy; 66uy; 67uy; 65uy; 66uy; 67uy; 65uy; 66uy; 1uy; 67uy; |] ; [| |]
     ]
 
 let encoder = new System.Text.ASCIIEncoding()

@@ -12,10 +12,10 @@ type Compressor =
 
         // Recursively processes a data for forming the result.
         let rec processing i current count =
-            if i = 0 then
-                processing 1 data.[i] 1y
-            elif i < data.Length then
-                if data.[i] = current then
+            if i < data.Length then
+                if i = 0 then
+                    processing 1 data.[i] 1y
+                elif data.[i] = current then
                     if count = 127y then
                         result.Add(byte count)
                         result.Add(current)
@@ -42,12 +42,13 @@ type Compressor =
                         result.Add(current)
                         processing (i+1) data.[i] (count-1y)
             else
-                if count > 0y then
-                    result.Add(byte count)
-                else
-                    result.[result.Count+(int count)] <- byte count
+                if i <> 0 then
+                    if count > 0y then
+                        result.Add(byte count)
+                    else
+                        result.[result.Count+(int count)] <- byte count
 
-                result.Add(current)
+                    result.Add(current)
       
         processing 0 0uy 0y // Start processing from the first byte of data.
         result.ToArray()

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio Express 2012 for Web
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Compressor", "Compressor.fsproj", "{66205C43-6B56-4FDF-BF1A-2ADFD16A1A4E}"
 EndProject
 Global

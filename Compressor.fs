@@ -6,6 +6,16 @@ open System
 
 /// Contains methods to compress a data with a various algorithms.
 type Compressor = 
+    static member private AddBit (container : ResizeArray<byte>) residue bit =
+        let tmp = Convert.ToString(container.[container.Count-1], 2)
+        let binstr = (new String('0', 8-tmp.Length) + tmp).Substring(0, 8-residue) + bit + new String('0', residue-1)
+        container.[container.Count-1] <- container.[container.Count-1] ||| Convert.ToByte(binstr, 2)
+        if residue = 1 then
+            container.Add(0uy)
+            8
+        else
+            residue-1
+    
     /// Performs a compressing with RLE algorithm.
     static member CompressRLE (data : byte[]) =
         let result = new ResizeArray<byte>()
@@ -75,3 +85,46 @@ type Compressor =
             result.ToArray()
         with
             | :? IndexOutOfRangeException -> raise (new ArgumentException "Data is corrupted.")
+    
+    /// Performs a compressing with adaptive Huffman coding.
+    static member CompressHuffman (data: byte[]) =
+        let result = new ResizeArray<byte>()
+
+        // Table of bytes frequences.
+        let table = ref Array.empty
+        
+        if data.Length = 1 then
+            result.Add(data.[0])
+            result.Add(0uy)
+            Compressor.AddBit result 8 "1" |> ignore
+            Compressor.AddBit result 7 "1" |> ignore
+        elif data.Length > 1 then
+            table.Value <- Array.append [|data.[0], 1|] !table // Add first byte to table.
+            result.Add(data.[0])    // First byte is adding directly.
+            result.Add(0uy)         // Create space for next codes.
+            let mutable residue = 8 // Now we have 8 free bits of space.
+
+            // Loop to process rest bytes.
+            for i=1 to data.Length-1 do
+                let index = Array.tryFindIndex (fun iter -> fst iter = data.[i]) !table
+                if index.IsSome then     // If current byte is in table...
+                    let cnt = Seq.findIndex (fun iter -> fst iter = data.[i]) !table
+                    let binstr = new String('1', cnt) + "0" //!!
+                    for c in binstr do
+                        residue <- Compressor.AddBit result residue (c.ToString()) // And add them to output array.
+                    table.Value <- Array.append !table [|data.[i], (snd (!table).[index.Value] + 1)|]  // Increment a frequency.
+                    table.Value <- Array.filter (fun iter -> iter <> (!table).[index.Value]) !table
+                    table.Value <- (Array.sortBy (fun iter -> -(snd iter)) !table)
+                else
+                    // Cumpute the ESC code for new byte.
+                    let tmp = Convert.ToString(data.[i], 2)
+                    let binstr = new String('1', (!table).Length) + "0" + new String('0', 8-tmp.Length) + tmp
+                    for c in binstr do
+                        residue <- Compressor.AddBit result residue (c.ToString()) // And add them to output array.
+                    table.Value <- Array.append !table [|data.[i], 1|]
+
+            let binstr = new String('1', (!table).Length) + "1"
+            for c in binstr do
+                residue <- Compressor.AddBit result residue (c.ToString()) // And add them to output array.
+
+        result.ToArray()
